@@ -1,0 +1,72 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAV8AiebjdcoS-Ratewz-HDkFt7XCq3zOM"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.9/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.9/themes/blitzer/jquery-ui.css" />
+    <script type="text/javascript">
+        function GetLocation(address, mapId) {
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 'address': address }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    var location = {};
+                    location.lattitude = results[0].geometry.location.lat();
+                    location.longitude = results[0].geometry.location.lng();
+                    location.address = results[0].formatted_address;
+                    var mapOptions = { center: new google.maps.LatLng(location.lattitude, location.longitude), zoom: 18, mapTypeId: google.maps.MapTypeId.ROADMAP };
+                    var infoWindow = new google.maps.InfoWindow();
+                    var latlngbounds = new google.maps.LatLngBounds();
+                    var map = new google.maps.Map(mapId, mapOptions);
+                    var myLatLng = new google.maps.LatLng(location.lattitude, location.longitude);
+                    var marker = new google.maps.Marker({ position: myLatLng, map: map });
+                    google.maps.event.addListener(marker, "click", function (e) {
+                        infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + location.address + "</div>");
+                        infoWindow.open(map, marker);
+                    });
+                }
+            });
+        };
+ 
+        function InitializeMap(maPId) {
+            var mapOptions = { center: new google.maps.LatLng(0, 0), zoom: 0, mapTypeId: google.maps.MapTypeId.ROADMAP }
+            var map = new google.maps.Map(maPId, mapOptions);
+        }
+ 
+        $(function () {
+            $("#btnmap").click(function () {
+                InitializeMap($("#canvasMap")[0]);
+                $("#dialog").dialog({
+                    modal: true,
+                    title: "Location",
+                    width: 400,
+                    hright: 400,
+                    buttons: {
+                        Close: function () {
+                            $(this).dialog('close');
+                            $("#lblOfficeAddress").val('');
+                        },
+                        Open: function () {
+                            GetLocation($("#lblOfficeAddress").val(), $("#canvasMap")[0]);
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <input type="submit" name="btnmap" value="Show Map" id="btnmap" />
+        <div id="dialog" style="display: none">
+            <input name="lblOfficeAddress" type="text" id="lblOfficeAddress" />
+            <hr />
+            <div id="canvasMap" style="height: 200px; width: 200;">
+            </div>
+        </div>
+    </div>
+    </form>
+</body>
+</html>
